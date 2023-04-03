@@ -109,6 +109,8 @@ public class OrderController {
 
         //countOfOrders that are left after a particular time of a DeliveryPartner
 
+        countOfOrders = orderService.getOrderLeftAfterGivenTimeByPartnerId(time, partnerId);
+
         return new ResponseEntity<>(countOfOrders, HttpStatus.CREATED);
     }
 
@@ -117,7 +119,7 @@ public class OrderController {
         String time = null;
 
         //Return the time when that partnerId will deliver his last delivery order.
-
+        time = orderService.getLastDeliveryTimeByPartnerId(partnerId);
         return new ResponseEntity<>(time, HttpStatus.CREATED);
     }
 

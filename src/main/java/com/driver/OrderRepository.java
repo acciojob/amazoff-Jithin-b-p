@@ -127,6 +127,71 @@ public class OrderRepository {
         }
         return count;
     }
+    public Integer getOrdersLeftAfterGivenTimeByPartnerId(String time,String partnerId){
+
+        int countOfOrders = 0;
+        int hours = Integer.valueOf(time.substring(0,2));
+        int minutes = Integer.valueOf(time.substring(3));
+        int total = hours*60 + minutes;
+
+        if(partnerOrderDb.containsKey(partnerId))
+        {
+            HashSet<String> set = partnerOrderDb.get(partnerId);
+
+            for(String st : set)
+            {
+                if(orderDb.containsKey(st))
+                {
+                    Order order = orderDb.get(st);
+
+                    if(total < order.getDeliveryTime())
+                        countOfOrders++;
+                }
+            }
+        }
+
+        return countOfOrders;
+    }
+
+    public String getLastDeliveryTimeByPartnerId(String partnerId) {
+        String time = null;
+        int delivery_time = 0;
+
+        if(partnerDb.containsKey(partnerId))
+        {
+            HashSet<String> list = partnerOrderDb.get(partnerId);
+
+            for(String st : list)
+            {
+                if(orderDb.containsKey(st))
+                {
+                    Order order = orderDb.get(st);
+
+                    if(delivery_time < order.getDeliveryTime())
+                        delivery_time = order.getDeliveryTime();
+                }
+            }
+        }
+        StringBuilder str = new StringBuilder();
+
+        int hr = delivery_time / 60;                 // calculate hour
+        if(hr < 10)
+            str.append(0).append(hr);
+        else
+            str.append(hr);
+
+        str.append(":");
+
+        int min = delivery_time - (hr*60);          // calculate minutes
+        if(min < 10)
+            str.append(0).append(min);
+        else
+            str.append(min);
+
+//        str.append(min);
+
+        return str.toString();
+    }
 
     public void deletePartnerById(String partnerId){
 
