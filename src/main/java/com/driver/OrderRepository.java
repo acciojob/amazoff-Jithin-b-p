@@ -193,30 +193,27 @@ public class OrderRepository {
         return str.toString();
     }
 
-    public void deletePartnerById(String partnerId){
+    public void deletePartnerById(String partnerId) {
 
-        HashSet<String> set = new HashSet<>();
-        if(partnerOrderDb.containsKey(partnerId)){
+        HashSet<String> list = new HashSet<>();
 
-            set = partnerOrderDb.get(partnerId);
+        if(partnerOrderDb.containsKey(partnerId))
+        {
+            list = partnerOrderDb.get(partnerId);
 
-            for(String order: set){
+            for (String st : list) {
 
-                if(orderPartnerPairDb.containsKey(set)){
 
-                    orderPartnerPairDb.remove(order);
-
-                }
+                if (orderPartnerPairDb.containsKey(st))
+                    orderPartnerPairDb.remove(st);
             }
+
             partnerOrderDb.remove(partnerId);
         }
 
-        if(partnerDb.containsKey(partnerId)){
-
+        if(partnerDb.containsKey(partnerId)) {
             partnerDb.remove(partnerId);
-
         }
-
     }
 
     public void deleteOrderById(String orderId){
