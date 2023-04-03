@@ -11,14 +11,19 @@ import java.util.Map;
 @Repository
 public class OrderRepository {
 
-    Map<String, Order> orderDb;
-    Map<String, DeliveryPartner> partnerDb;
+    private Map<String, Order> orderDb;
+    private Map<String, DeliveryPartner> partnerDb;
 
-    Map<String, String> orderPartnerPairDb;
+    private Map<String, String> orderPartnerPairDb;
 
-    Map<String, List<String>> partnerOrderDb;
+    private Map<String, List<String>> partnerOrderDb;
 
-
+    public OrderRepository() {
+        this.orderDb = new HashMap<>();
+        this.partnerDb = new HashMap<>();
+        this.orderPartnerPairDb = new HashMap<>();
+        this.partnerOrderDb = new HashMap<>();
+    }
 
     public void addOrder(Order order){
 
