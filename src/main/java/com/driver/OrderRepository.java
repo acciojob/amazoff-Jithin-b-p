@@ -3,10 +3,7 @@ package com.driver;
 
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class OrderRepository {
@@ -16,7 +13,7 @@ public class OrderRepository {
 
     private Map<String, String> orderPartnerPairDb;
 
-    private Map<String, List<String>> partnerOrderDb;
+    private Map<String, HashSet<String>> partnerOrderDb;
 
     public OrderRepository() {
         this.orderDb = new HashMap<>();
@@ -41,39 +38,65 @@ public class OrderRepository {
 
     public void addOrderPartnerPair(String orderId, String partnerId){
 
-        orderPartnerPairDb.put(orderId, partnerId);
-        if(!partnerOrderDb.containsKey(partnerId)){
 
-            partnerOrderDb.put(partnerId, new ArrayList<>());
-            partnerOrderDb.get(partnerId).add(orderId);
-        }else{
+        if(orderDb.containsKey(orderId) && partnerDb.containsKey(partnerId)){
 
-            partnerOrderDb.get(partnerId).add(orderId);
+            HashSet<String> currentOrders = new HashSet<>();
+            if(partnerOrderDb.containsKey(partnerId)){
+
+                currentOrders = partnerOrderDb.get(partnerId);
+            }
+            currentOrders.add(orderId);
+            partnerOrderDb.put(partnerId, currentOrders);
+
+            DeliveryPartner partner = partnerDb.get(partnerId);
+            partner.setNumberOfOrders(currentOrders.size());
+
+            orderPartnerPairDb.put(orderId, partnerId);
         }
-        partnerDb.get(partnerId).setNumberOfOrders(partnerDb.get(partnerId).getNumberOfOrders() + 1);
 
     }
 
     public Order getOrderById(String orderId){
 
-        return orderDb.get(orderId);
+        Order order = orderDb.get(orderId);
+        return order;
 
     }
 
     public DeliveryPartner getPartnerById(String partnerId){
 
-        return partnerDb.get(partnerId);
+        DeliveryPartner deliveryPartner = null;
+
+        if(partnerDb.containsKey(partnerId)){
+
+            deliveryPartner = partnerDb.get(partnerId);
+        }
+
+        return deliveryPartner;
 
     }
 
     public int getOrderCountByPartnerId(String partnerId){
 
-        return partnerDb.get(partnerId).getNumberOfOrders();
+        int orderCount = 0;
+
+        if(partnerOrderDb.containsKey(partnerId)){
+
+            orderCount = partnerOrderDb.get(partnerId).size();
+
+        }
+        return orderCount;
     }
 
     public List<String> getOrdersByPartnerId(String partnerId){
 
-        return partnerOrderDb.get(partnerId);
+        List<String> orders = new ArrayList<>();
+
+        for(String orderId: partnerOrderDb.get(partnerId)){
+            orders.add(orderId);
+        }
+        return orders;
 
     }
 
@@ -107,35 +130,48 @@ public class OrderRepository {
 
     public void deletePartnerById(String partnerId){
 
-        partnerDb.remove(partnerId);
+        HashSet<String> set = new HashSet<>();
+        if(partnerOrderDb.containsKey(partnerId)){
 
-        for(String order: orderPartnerPairDb.keySet()){
+            set = partnerOrderDb.get(partnerId);
 
-            if(orderPartnerPairDb.get(order).equals(partnerId)){
+            for(String order: set){
 
-                orderPartnerPairDb.remove(order);
+                if(orderPartnerPairDb.containsKey(set)){
 
+                    orderPartnerPairDb.remove(order);
+
+                }
             }
+            partnerOrderDb.remove(partnerId);
         }
-        partnerOrderDb.remove(partnerId);
 
+        if(partnerDb.containsKey(partnerId)){
+
+            partnerDb.remove(partnerId);
+
+        }
 
     }
 
     public void deleteOrderById(String orderId){
 
-        orderDb.remove(orderId);
+        if(orderPartnerPairDb.containsKey(orderId)){
 
-        String partnerId = orderPartnerPairDb.get(orderId);
-        partnerDb.get(partnerId).setNumberOfOrders(partnerDb.get(partnerId).getNumberOfOrders() - 1);
+            String partnerId = orderPartnerPairDb.get(orderId);
+            HashSet<String> set = partnerOrderDb.get(partnerId);
+            set.remove(orderId);
 
-        orderPartnerPairDb.remove(orderId);
+            partnerOrderDb.put(partnerId, set);
 
-        List<String> orders = partnerOrderDb.get(partnerId);
+            DeliveryPartner deliveryPartner = partnerDb.get(partnerId);
+            deliveryPartner.setNumberOfOrders(set.size());
+        }
 
-        orders.remove(orderId);
-        partnerOrderDb.put(partnerId, orders);
+        if(orderDb.containsKey(orderId)){
 
+            orderDb.remove(orderId);
+        }
 
     }
 }
